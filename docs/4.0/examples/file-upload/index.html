@@ -1,0 +1,91 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
+
+  <!ATTLIST input base CDATA #IMPLIED>
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Signin Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="signin.css" rel="stylesheet">
+  </head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script>
+var poiFileID;
+function myFunction(){
+// Check for the File API support.
+if (window.File && window.FileReader && window.FileList && window.Blob) {
+  document.getElementById('poiFile').addEventListener('change', function (){handleFileSelect(this.event,poiFileID);}, false);
+  document.getElementById('poaFile').addEventListener('change', handleFileSelect, false);
+} else {
+  alert('The File APIs are not fully supported in this browser.');
+}
+}
+
+function handleFileSelect(evt,base) {
+  var f = evt.target.files[0]; // FileList object
+  var reader = new FileReader();
+  // Closure to capture the file information.
+  reader.onload = (function(theFile) {
+    return function(e,base) {
+      var binaryData = e.target.result;
+        fetch('http://localhost:8282/addFile', {
+        method: 'POST',
+        body: JSON.stringify({
+          fileContent: window.btoa(binaryData)
+        }),
+        headers: {
+          "Content-type": "application/json; charset=UTF-8"
+        }
+      })
+      .then(response => response.json())
+      .then(json => base=json);
+      //alert(poiFileID);      
+    };
+  })(f);
+  // Read in the image file as a data URL.
+  reader.readAsBinaryString(f);
+}
+
+
+  
+    $(document).ready(function () {  
+             $("#Save").click(function () {  
+               //var filed=document.getElementById('poiFile');
+              alert(poiFileID);
+                 
+             });  
+         });  
+
+  </script>
+  <body class="text-center" onload="myFunction()">
+    <form class="form-signin" >
+      
+      <h1 class="h3 mb-3 font-weight-normal">Storing of Documents: PoC</h1>
+      <label for="inputEmail" class="sr-only">Email address</label>
+      <input type="email" id="inputEmail" class="form-control" placeholder="Email address" autofocus>
+      <div class="form-group-inline">
+        <label for="poiFile">PoI File</label>
+        <input type="file" class="form-control-file" id="poiFile" >
+        <label for="poaFile">PoA File</label>
+        <input type="file" class="form-control-file" id="poaFile">
+      </div>
+      
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      <input type="button" id="Save" value="Save Data" />  
+      <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
+    </form>
+  </body>
+</html>
