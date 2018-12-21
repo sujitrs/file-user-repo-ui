@@ -24,13 +24,13 @@
       <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav mr-auto">
-              <li class="nav-item ">
+              <li class="nav-item active">
                 <a class="nav-link" href="..\create-user\index.html">Create User <span class="sr-only">(current)</span></a>
               </li>
               <li class="nav-item ">
                   <a class="nav-link" href="..\list-users\index.html">List Users</a>
                 </li>
-              <li class="nav-item active">
+              <li class="nav-item ">
                 <a class="nav-link" href="..\profile-file-upload\index.html">Profile</a>
               </li>
               <li class="nav-item">
@@ -41,41 +41,30 @@
         </nav>
 
       <form>
-          <h1 class="h3 mb-3 font-weight-normal">Storing of Documents: PoC</h1>
-          <label for="id" class="sr-only">ID of User</label>
-          <input type="text" id="id" class="form-control" placeholder="Unique Identifier of User" autofocus>
-          <hr>
+          <h1 class="h3 mb-3 font-weight-normal">Create User</h1>
+          
           <div class="form-row align-items-center">
             <div class="col-auto">
-            <label for="poiFile" ><b> PoI File</b></label>
+            <label for="name" ><b> Name</b></label>
             </div>
             <div class="col-auto">
-              <input type="file" class="form-control-file" id="poiFile" data-base="" data-refid="" >
+              <input type="text" class="form-control" id="name" required>
             </div>
-          <div class="col-auto">
-            <input type="button" class="btn btn-success" id=downloadPoiFile value="Download">
-            <input type="button" class="btn btn-danger" id=deletePoiFile value="Delete">
-          </div>
-        </div>
-        <hr>
-          <div class="form-row align-items-center">
-              <div class="col-auto">
-              <label for="poaFile" ><b>PoA File</b></label>
-              </div>
-            <div class="col-auto">
-              
-              <input type="file" class="form-control-file" id="poaFile" data-base="" data-refid="" >
-          </div>
-          <div class="col-auto">
-            <input type="button" class="btn btn-success" id=downloadPoaFile value="Download">
-            <input type="button" class="btn btn-danger" id=deletePoaFile value="Delete">
-          </div>
-        </div>
-        <hr>
-          <div class="form-row align-items-center">
             <div class="col-auto"> 
-              <button class="btn btn-lg btn-primary btn-block">Save</button>
-            </div>
+                <a class="btn btn-md btn-primary" style="color: whitesmoke;" id="save">Save</a>
+              </div>
+        </div>
+        <hr>
+        <div class="form-row align-items-center">
+            <div class="col-auto">
+        <label for="id" ><b>ID of User</b></label></div>
+        <div class="col-auto">
+        <input type="text" id="id" class="form-control" placeholder="Unique Identifier of User (Auto Generated)" length=40 readonly>
+      </div>
+      </div>
+        <hr>
+          <div class="form-row align-items-center">
+            
           </div>
     </form>
     <script src="./events.js"></script>
