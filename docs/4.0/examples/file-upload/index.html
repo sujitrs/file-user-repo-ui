@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"
 
-  <!ATTLIST input base CDATA #IMPLIED>
+  
 
 
 <html lang="en">
@@ -21,71 +21,153 @@
     <!-- Custom styles for this template -->
     <link href="signin.css" rel="stylesheet">
   </head>
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  
+  <body class="text-center" >
+    <form>
+      
+      <h1 class="h3 mb-3 font-weight-normal">Storing of Documents: PoC</h1>
+      <label for="inputEmail" class="sr-only">Email address</label>
+      <input type="email" id="inputEmail" class="form-control" placeholder="Email address" autofocus>
+      <hr>
+      <div class="form-row align-items-center">
+        <div class="col-auto">
+        <label for="poiFile" ><b> PoI File</b></label>
+        </div>
+        <div class="col-auto">
+          <input type="file" class="form-control-file" id="poiFile" data-base="" data-refid="" >
+        </div>
+      <div class="col-auto">
+        <input type="button" class="btn btn-success" id=downloadPoiFile value="Download">
+        <input type="button" class="btn btn-danger" id=deletePoiFile value="Delete">
+      </div>
+    </div>
+    <hr>
+      <div class="form-row align-items-center">
+          <div class="col-auto">
+          <label for="poaFile" ><b>PoA File</b></label>
+          </div>
+        <div class="col-auto">
+          
+          <input type="file" class="form-control-file" id="poaFile" data-base="" data-refid="" >
+      </div>
+      <div class="col-auto">
+        <input type="button" class="btn btn-success" id=downloadPoaFile value="Download">
+        <input type="button" class="btn btn-danger" id=deletePoaFile value="Delete">
+      </div>
+    </div>
+    <hr>
+      <div class="form-row align-items-center"><div class="col-auto"> <button class="btn btn-lg btn-primary btn-block">Save</button></div></div>
+      
+      
+      
+    </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script>
-var poiFileID;
-function myFunction(){
+
 // Check for the File API support.
 if (window.File && window.FileReader && window.FileList && window.Blob) {
-  document.getElementById('poiFile').addEventListener('change', function (){handleFileSelect(this.event,poiFileID);}, false);
-  document.getElementById('poaFile').addEventListener('change', handleFileSelect, false);
+  document.getElementById('poiFile').addEventListener('change', processFile, false);
+  document.getElementById('poaFile').addEventListener('change', processFile, false);
+
+  document.getElementById('downloadPoiFile').addEventListener('click', function(){downloadFile('poiFile')}, false);
+  document.getElementById('downloadPoaFile').addEventListener('click', function(){downloadFile('poaFile')}, false);
+
+  document.getElementById('deletePoiFile').addEventListener('click', function(){deleteFile('poiFile')}, false);
+  document.getElementById('deletePoaFile').addEventListener('click', function(){deleteFile('poaFile')}, false);
 } else {
   alert('The File APIs are not fully supported in this browser.');
 }
+
+
+function downloadFile(file){
+  var fileField=document.getElementById(file).dataset.refid;
+  fetch('http://localhost:8181/getFile/'+fileField)
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(myJson) {
+    var blob = b64toBlob(myJson.fileContent,myJson.fileType);
+    let objectURL = window.URL.createObjectURL(blob);
+    let anchor = document.createElement('a');
+    anchor.href = objectURL;
+    anchor.download = name;
+    anchor.click();
+    URL.revokeObjectURL(objectURL);
+  });
 }
 
-function handleFileSelect(evt,base) {
-  var f = evt.target.files[0]; // FileList object
+function deleteFile(file){
+  var fileField=document.getElementById(file).dataset.refid;
+  fetch('http://localhost:8181/removeFile/'+fileField,{method: 'PATCH'}).then(function(response) {
+    return response.json();
+  }).then(function(myJson) {alert(myJson)});
+  
+}
+//image/jpeg;base64,
+function processFile(){
+  var f = this.files[0]; // FileList object
+  var att=this.id;
   var reader = new FileReader();
+
   // Closure to capture the file information.
-  reader.onload = (function(theFile) {
-    return function(e,base) {
-      var binaryData = e.target.result;
-        fetch('http://localhost:8282/addFile', {
-        method: 'POST',
-        body: JSON.stringify({
-          fileContent: window.btoa(binaryData)
-        }),
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
-      })
-      .then(response => response.json())
-      .then(json => base=json);
-      //alert(poiFileID);      
-    };
-  })(f);
-  // Read in the image file as a data URL.
-  reader.readAsBinaryString(f);
+
+  reader.onload = (function(theFile,myFile) {
+  return function(e) {
+  var base64Data = e.target.result;
+  //console.log(base64Data);
+  var metaDataIndex=base64Data.indexOf(",");
+  document.getElementById(myFile).dataset.base=base64Data;
+  fetch('http://localhost:8181/addFile', {
+          method: 'POST',
+          body: JSON.stringify({
+            fileContent: base64Data.substring(metaDataIndex+1),// Had to add 1 to get actual index
+            fileType:f.type
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8"
+          }
+        })
+        .then(response => response.json())
+        .then(json => document.getElementById(myFile).dataset.refid=json);
+  };
+
+  })(f,att);
+  reader.readAsDataURL(f);
 }
 
 
   
     $(document).ready(function () {  
              $("#Save").click(function () {  
-               //var filed=document.getElementById('poiFile');
-              alert(poiFileID);
+               var filed=document.getElementById('poiFile');
+              console.log(filed);
                  
              });  
          });  
 
+         function b64toBlob(b64Data, contentType, sliceSize) {
+            contentType = contentType || '';
+            sliceSize = sliceSize || 512;
+
+            var byteCharacters = atob(b64Data);
+            var byteArrays = [];
+
+            for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+              var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+              var byteNumbers = new Array(slice.length);
+              for (var i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+              }
+
+              var byteArray = new Uint8Array(byteNumbers);
+
+              byteArrays.push(byteArray);
+            }
+              
+            var blob = new Blob(byteArrays, {type: contentType});
+            return blob;
+          }
   </script>
-  <body class="text-center" onload="myFunction()">
-    <form class="form-signin" >
-      
-      <h1 class="h3 mb-3 font-weight-normal">Storing of Documents: PoC</h1>
-      <label for="inputEmail" class="sr-only">Email address</label>
-      <input type="email" id="inputEmail" class="form-control" placeholder="Email address" autofocus>
-      <div class="form-group-inline">
-        <label for="poiFile">PoI File</label>
-        <input type="file" class="form-control-file" id="poiFile" >
-        <label for="poaFile">PoA File</label>
-        <input type="file" class="form-control-file" id="poaFile">
-      </div>
-      
-      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      <input type="button" id="Save" value="Save Data" />  
-      <p class="mt-5 mb-3 text-muted">&copy; 2017-2018</p>
-    </form>
   </body>
 </html>
