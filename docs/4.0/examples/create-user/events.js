@@ -10,7 +10,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
       alert('Please enter name');
       return;
     };
-    fetch('http://localhost:9191/addUser', {
+    fetch('http://localhost:9000/addUser', {
             method: 'POST',
             body: JSON.stringify({
               name: document.getElementById('name').value

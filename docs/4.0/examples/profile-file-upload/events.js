@@ -7,14 +7,36 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
   
     document.getElementById('deletePoiFile').addEventListener('click', function(){deleteFile('poiFile')}, false);
     document.getElementById('deletePoaFile').addEventListener('click', function(){deleteFile('poaFile')}, false);
+    document.getElementById('save').addEventListener('click', saveme, false);
   } else {
     alert('The File APIs are not fully supported in this browser.');
   }
   
+
+  function saveme(){
+    alert("hi");
+    var id=document.getElementById("id").value;
+    var poaFileId=document.getElementById("poaFile").dataset.refid;
+    var poiFileId=document.getElementById("poiFile").dataset.refid;
+    
+    fetch('http://localhost:9000/updateUser/'+id, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              poiFileID: poiFileId,// Had to add 1 to get actual index
+              poaFileID:poaFileId
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8"
+            }
+          })
+          .then(response => response.json())
+          .then(json => alert(json));
+   // };
+  }
   
   function downloadFile(file){
     var fileField=document.getElementById(file).dataset.refid;
-    fetch('http://localhost:8181/getFile/'+fileField)
+    fetch('http://localhost:8000/getFile/'+fileField)
     .then(function(response) {
       return response.json();
     })
@@ -31,7 +53,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
   
   function deleteFile(file){
     var fileField=document.getElementById(file).dataset.refid;
-    fetch('http://localhost:8181/removeFile/'+fileField,{method: 'PATCH'}).then(function(response) {
+    fetch('http://localhost:8000/removeFile/'+fileField,{method: 'PATCH'}).then(function(response) {
       return response.json();
     }).then(function(myJson) {alert(myJson)});
     
@@ -50,7 +72,7 @@ if (window.File && window.FileReader && window.FileList && window.Blob) {
     //console.log(base64Data);
     var metaDataIndex=base64Data.indexOf(",");
     document.getElementById(myFile).dataset.base=base64Data;
-    fetch('http://localhost:8181/addFile', {
+    fetch('http://localhost:8000/addFile', {
             method: 'POST',
             body: JSON.stringify({
               fileContent: base64Data.substring(metaDataIndex+1),// Had to add 1 to get actual index
